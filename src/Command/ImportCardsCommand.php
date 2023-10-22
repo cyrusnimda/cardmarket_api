@@ -70,7 +70,7 @@ class ImportCardsCommand extends Command
                 $card->setName($name);
                 $card->setEdition("A");
                 $card->setImage($image);
-                $card->setStock(rand(0, 10));
+                $card->setStock(rand(0, 4));
                 $card->setPrice(rand(10, 1000) / 100);
 
                 $this->entityManager->persist($card);
