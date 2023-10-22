@@ -13,35 +13,34 @@ use Symfony\Component\Serializer\SerializerInterface;
 class CardController extends AbstractController
 {
 
-    #[Route('/{id}', name: 'find_card', requirements: ['id' => '\d+'])]
-    public function find(int $id): JsonResponse
-    {
-        return $this->json([
-            'status' => 'OK',
-            'card' => [
-                "id" => $id,
-                "name" => "Black lotus",
-                "edition" => "A",
-            ]
-        ]);
+    public function __construct(EntityManagerInterface $entityManager, SerializerInterface $serializer) {
+        $this->entityManager = $entityManager;
+        $this->serializer = $serializer;
+        $this->cardRepository = $entityManager->getRepository(Card::class);
     }
-    
-
+ 
     #[Route('/random', name: 'get_random_cards')]
-    public function getRandomCards(EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    public function getRandomCards(): JsonResponse
     {
-        $qb = $entityManager->createQueryBuilder();
-        $qb->select($qb->expr()->count('card.id'));
-        $qb->from('App:Card','card');
-        $totalCards = $qb->getQuery()->getSingleScalarResult();
+        $totalCards = $this->cardRepository->getTotalCards();
 
         $randomNumbers = $this->getFourRandomNumbers($totalCards);
-        $cards = $entityManager->getRepository(Card::class)->findById($randomNumbers);
-        //dump($cards);
+        $cards = $this->cardRepository->findById($randomNumbers);
 
         return $this->json([
             'status' => 'OK',
-            'cards' => $serializer->serialize($cards, 'json')
+            'cards' => $this->serializer->serialize($cards, 'json')
+        ]);
+    }
+
+    #[Route('/search/{name}', name: 'search_cards')]
+    public function searchCards(string $name): JsonResponse
+    {
+        $cards = $this->cardRepository->searchByName($name);
+
+        return $this->json([
+            'status' => 'OK',
+            'cards' => $this->serializer->serialize($cards, 'json')
         ]);
     }
 
