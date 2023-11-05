@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Card;
 use Symfony\Component\Serializer\SerializerInterface;
+
 
 #[Route('/cards')]
 class CardController extends AbstractController
@@ -23,10 +25,13 @@ class CardController extends AbstractController
     public function find(int $id): JsonResponse
     {
         $card = $this->cardRepository->find($id);
-        return $this->json([
+        $response  = [
             'status' => 'OK',
-            'card' => $this->serializer->serialize($card, 'json')
-        ]);
+            'card' => $card
+        ];
+        $json = $this->serializer->serialize($response, 'json');
+
+        return JsonResponse::fromJsonString($json);
     }
  
     #[Route('/random', name: 'get_random_cards')]
@@ -37,10 +42,13 @@ class CardController extends AbstractController
         $randomNumbers = $this->getFourRandomNumbers($totalCards);
         $cards = $this->cardRepository->findById($randomNumbers);
 
-        return $this->json([
+        $response  = [
             'status' => 'OK',
-            'cards' => $this->serializer->serialize($cards, 'json')
-        ]);
+            'cards' => $cards
+        ];
+        $json = $this->serializer->serialize($response, 'json');
+
+        return JsonResponse::fromJsonString($json);
     }
 
     #[Route('/search/{name}', name: 'search_cards')]
@@ -48,10 +56,13 @@ class CardController extends AbstractController
     {
         $cards = $this->cardRepository->searchByName($name);
 
-        return $this->json([
+        $response  =[
             'status' => 'OK',
-            'cards' => $this->serializer->serialize($cards, 'json')
-        ]);
+            'cards' => $cards
+        ];
+        $json = $this->serializer->serialize($response, 'json');
+
+        return JsonResponse::fromJsonString($json);
     }
 
     private function getFourRandomNumbers(int $totalCards) : array
