@@ -18,6 +18,16 @@ class CardController extends AbstractController
         $this->serializer = $serializer;
         $this->cardRepository = $entityManager->getRepository(Card::class);
     }
+
+    #[Route('/{id}', name: 'find_card', requirements: ['id' => '\d+'])]
+    public function find(int $id): JsonResponse
+    {
+        $card = $this->cardRepository->find($id);
+        return $this->json([
+            'status' => 'OK',
+            'card' => $this->serializer->serialize($card, 'json')
+        ]);
+    }
  
     #[Route('/random', name: 'get_random_cards')]
     public function getRandomCards(): JsonResponse
